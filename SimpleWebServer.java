@@ -63,13 +63,13 @@ public class SimpleWebServer {
 			ServerSocket serverConnect = new ServerSocket(PORT);
 			System.out.println("Server started.\nListening for connections on port : " + PORT + " ...\n");
 	
-			// create one instance of the required task
+			// create one instance of the required task`
 			ServeWebRequest s = new ServeWebRequest();
 
 			// listen until user halts server execution
 			while (true) {
 				// accept client connection request
-				connect = serverConnect.accept();
+				connect = serverConnect.accept(); 
 				count++;
 				
 				if (verbose) {
