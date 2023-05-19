@@ -1,9 +1,8 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Date;
-import java.io.*;
-import java.net.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @(#)SimpleWebServer.java
@@ -41,6 +40,8 @@ public class SimpleWebServer {
 	// connection ID
 	static int count = 0;
 
+	private static ExecutorService pool;
+
 	// convert the following method to multi-threaded
 	// to handle multiple clients simultaneously
 	// and to improve the performance of the server
@@ -59,23 +60,22 @@ public class SimpleWebServer {
 				overload = args[3];
 			} 
 
+			pool=  Executors.newFixedThreadPool(threadNumber);
 			// create a server listening socket
 			ServerSocket serverConnect = new ServerSocket(PORT);
 			System.out.println("Server started.\nListening for connections on port : " + PORT + " ...\n");
 	
-			// create one instance of the required task`
-			ServeWebRequest s = new ServeWebRequest();
+			// create one instance of the required task
+			// ServeWebRequest s = new ServeWebRequest();
 
 			// listen until user halts server execution
 			while (true) {
 				// accept client connection request
 				connect = serverConnect.accept(); 
 				count++;
-				
-				if (verbose) {
-					System.out.println("Connecton " + count + " opened. (" + new Date() + ")");
-				}
-				s.serve(connect, count);
+				System.out.println("[SERVER] Connected to client!");
+				ClientHandler clientThread = new ClientHandler(connect,count);
+				pool.execute(clientThread);
 			}
 
 		} catch (IOException e) {
