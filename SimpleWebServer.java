@@ -1,8 +1,6 @@
-import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
 
 /**
  * @(#)SimpleWebServer.java
@@ -40,7 +38,7 @@ public class SimpleWebServer {
 	// connection ID
 	static int count = 0;
 
-	private static ExecutorService pool;
+	private static ThreadPool pool;
 
 	// convert the following method to multi-threaded
 	// to handle multiple clients simultaneously
@@ -60,7 +58,8 @@ public class SimpleWebServer {
 				overload = args[3];
 			} 
 
-			pool=  Executors.newFixedThreadPool(threadNumber);
+			pool= new ThreadPool();
+			pool.setPoolSize(threadNumber);
 			// create a server listening socket
 			ServerSocket serverConnect = new ServerSocket(PORT);
 			System.out.println("Server started.\nListening for connections on port : " + PORT + " ...\n");
@@ -69,16 +68,22 @@ public class SimpleWebServer {
 			// ServeWebRequest s = new ServeWebRequest();
 
 			// listen until user halts server execution
-			while (true) {
-				// accept client connection request
-				connect = serverConnect.accept(); 
-				count++;
-				System.out.println("[SERVER] Connected to client!");
-				ClientHandler clientThread = new ClientHandler(connect,count);
-				pool.execute(clientThread);
+
+			try {
+				while (true) {
+					// accept client connection request
+					connect = serverConnect.accept(); 
+					count++;
+					System.out.println("[SERVER] Connected to client!");
+					ClientHandler clientThread = new ClientHandler(connect,count);
+					pool.enqueue(clientThread);
+				}
+			} finally {
+				pool.destroy();
+				serverConnect.close();
 			}
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 			System.err.println("Server Connection error : " + e.getMessage());
 		}
 	}

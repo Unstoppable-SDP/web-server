@@ -1,90 +1,153 @@
-import java.net.Socket;
-import java.util.concurrent.*;
 
-//class ThreadPoolExample {
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
-    // public static void main(String[] args) {
-    //     // Create a thread pool with 5 threads
-    //     ThreadPool pool = new ThreadPool(5,"h",7);
+// the current implementation is used monitor we should use semaphore instead
+public class ThreadPool {
 
-    //     // Submit tasks to the thread pool
-    //     for (int i = 0; i < 10; i++) {
-    //         pool.execute(new Task(i));
-    //     }
+	static final List<PoolThread> unloader = new LinkedList<PoolThread>();
 
-    //     // Shutdown the thread pool
-    //     pool.shutdown();
-    // }
 
-public  class ThreadPool {
-    private int maxPool;
-    private String oHandle;
-    private int maxBuffer;
-    private PoolWorker[] threads;
-    //private ClientHandler serverRequest;
-    private BlockingQueue<Runnable> queue;
-    private Semaphore sem;
+	public void destroy() {
+		for (PoolThread t : unloader)
+			t.apoptosis();
+	}
 
-    public ThreadPool(int maxPool,String oHandle,int maxBuffer){
-        //Initialize the variable
-        this.maxPool=maxPool;
-        this.maxBuffer=maxBuffer;
-        this.oHandle=oHandle;
-        sem = new Semaphore(maxBuffer);
-        queue = new LinkedBlockingQueue<>();
-        threads = new PoolWorker[maxPool];
-        //Create threads
-        for (int i = 0; i < maxPool; i++) {
-            threads[i] = new PoolWorker();
-            threads[i].start();
-        }
-    }
+	private static class PoolThread extends Thread {
+		private boolean done = false;
+		PoolThread() {
+			super();
+			setDaemon(true);
+			start();
+			unloader.add(this);
+		}
 
-    public void execute(Runnable task) {
-        synchronized (queue) {
-            queue.add(task);
-            queue.notify();
-        }
-    }
+		synchronized void apoptosis() {
+			done = true;
+			interrupt();
+		}
 
-    public void shutdown(){
-        for (PoolWorker worker : threads) {
-            worker.stopWorker();
-        }
-    }
+		private Runnable r;
 
-    private class PoolWorker extends Thread {
-        private boolean stopped = false;
+		@Override
+		public void run() {
+			while (true) {
+				synchronized (this) {
+					while (!done && r == null) {
+						try {
+							wait();
+						} catch (InterruptedException e) {
+							if (!done)
+								e.printStackTrace();
+						}
+					}
+				}
+				if (done)
+					break;
+				try {
+					r.run();
+				} catch (Throwable t) {
+					t.printStackTrace();
+				}
+				r = null;
+				synchronized (pool) {
+					pool.add(this);
+					pool.notify();
+				}
+			}
+		}
 
-        public void run() {
-            Runnable task;
+		synchronized void setR(Runnable r) {
+			this.r = r;
+			notify();
+		}
+	}
 
-            while (!stopped) {
-                synchronized (queue) {
-                    //if the queue is empty
-                    while (queue.isEmpty()) {
-                        try {
-                            queue.wait();
-                        } catch (InterruptedException e) {
-                            System.err.println("Interrupted exception in thread pool");
-                            System.err.println(e.getMessage());
-                        }
-                    }
-                    task = queue.poll();
-                }
+	private static int poolSize = -1;
+	private static final Queue<PoolThread> pool = new LinkedList<PoolThread>();
+	private static boolean singleThreaded = false;
 
-                try {
-                    task.run();
-                } catch (RuntimeException e) {
-                    System.err.println("Runtime exception in thread pool");
-                    System.err.println(e.getMessage());
-                }
-            }
-        }
 
-        public void stopWorker() {
-            stopped = true;
-        }
-    }
+	public void setPoolSize(int poolSize) throws ThreadPoolException {
+		synchronized (pool) {
+			if (ThreadPool.poolSize == -1) {
+				if (poolSize < 1)
+					throw new ThreadPoolException("pool size must be positive");
+				ThreadPool.poolSize = poolSize;
+				init();
+			} else
+				throw new ThreadPoolException("pool already initialized");
+		}
+	}
+
+	public int getPoolSize() {
+		synchronized (pool) {
+			return poolSize;
+		}
+	}
+
+	public void enqueue(Runnable r) {
+		if (singleThreaded)
+			r.run();
+		else {
+			PoolThread t = null;
+			synchronized (pool) {
+				if (poolSize == -1) {
+					poolSize = Runtime.getRuntime().availableProcessors();
+					init();
+				}
+				while (pool.isEmpty()) {
+					try {
+						pool.wait();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				t = pool.remove();
+			}
+			t.setR(r);
+		}
+	}
+
+	public void flush() {
+		synchronized (pool) {
+			while (pool.size() < poolSize) {
+				try {
+					pool.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	private void init() {
+		for (int i = 0; i < poolSize; i++)
+			pool.add(new PoolThread());
+	}
+
+	public void setSingleThreaded(boolean singleThreaded)
+			throws ThreadPoolException {
+		synchronized (pool) {
+			if (poolSize > -1)
+				throw new ThreadPoolException(
+						"setting single threaded after thread pool initialized");
+			ThreadPool.singleThreaded = singleThreaded;
+			poolSize = 0;
+		}
+	}
+
+	public boolean isSingleThreaded() {
+		return singleThreaded;
+	}
 }
-// }
+
+
+class ThreadPoolException extends Exception {
+	public ThreadPoolException(String message) {
+		super(message);
+	}
+
+	private static final long serialVersionUID = 1L;
+}
