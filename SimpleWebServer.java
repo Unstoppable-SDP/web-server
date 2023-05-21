@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -46,7 +47,7 @@ public class SimpleWebServer {
 	// by using a thread pool
 	//
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 	
 		try {
 
@@ -63,7 +64,8 @@ public class SimpleWebServer {
 			// create a server listening socket
 			ServerSocket serverConnect = new ServerSocket(PORT);
 			System.out.println("Server started.\nListening for connections on port : " + PORT + " ...\n");
-	
+			//write into webserver-log
+			LogFile.logFileOutput("Server started.\nListening for connections on port : " + PORT + " ...\n");
 			// create one instance of the required task
 			// ServeWebRequest s = new ServeWebRequest();
 
@@ -75,6 +77,8 @@ public class SimpleWebServer {
 					connect = serverConnect.accept(); 
 					count++;
 					System.out.println("[SERVER] Connected to client!");
+					//write into webserver-log
+					LogFile.logFileOutput("[SERVER] Connected to client!");
 					ClientHandler clientThread = new ClientHandler(connect,count);
 					pool.enqueue(clientThread);
 				}
@@ -85,6 +89,7 @@ public class SimpleWebServer {
 
 		} catch (Exception e) {
 			System.err.println("Server Connection error : " + e.getMessage());
+			LogFile.logFileOutput("Server Connection error : " + e.getMessage());
 		}
 	}
 }
