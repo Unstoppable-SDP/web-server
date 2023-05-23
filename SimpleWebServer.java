@@ -24,14 +24,14 @@ public class SimpleWebServer {
 	static int PORT = 8085;
 
 	// thread number
-	static int threadNumber = 7;
+	static int threadNumber = 2;
 
 	// buffer size
 
-	static int bufferSize = 5;
+	static int bufferSize = 1;
 
 	// overload method
-	static String overload = "BLCK";
+	static String overload = "DRPT";
 
 	// Client Connection via Socket Class
 	static Socket connect;
@@ -59,10 +59,8 @@ public class SimpleWebServer {
 				overload = args[3];
 			} 
 
-			pool= new ThreadPool();
-			pool.setPoolSize(threadNumber);
-			pool.setBufferSize(bufferSize);
-			pool.setOverLoadMethod(overload);
+			pool= new ThreadPool(threadNumber, bufferSize, overload);
+
 			// create a server listening socket
 			ServerSocket serverConnect = new ServerSocket(PORT);
 			System.out.println("Server started.\nListening for connections on port : " + PORT + " ...\n");
@@ -83,9 +81,10 @@ public class SimpleWebServer {
 					LogFile.logFileOutput("[SERVER] Connected to client!");
 					ClientHandler clientThread = new ClientHandler(connect,count);
 					pool.enqueue(clientThread);
+					// close the connection
 				}
 			} finally {
-				pool.destroy();
+				// pool.destroy();
 				serverConnect.close();
 			}
 

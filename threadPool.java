@@ -2,100 +2,43 @@
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.Semaphore;
 
 // the current implementation is used monitor we should use semaphore instead
 public class ThreadPool {
 
-	static final List<PoolThread> unloader = new LinkedList<PoolThread>(); // unloader is the threadpool
-
-
-	public void destroy() {
-		for (PoolThread t : unloader)
-			t.apoptosis();
-	}
-
-	private static class PoolThread extends Thread {
-		private boolean done = false;
-		PoolThread() {
-			super();
-			setDaemon(true);
-			start();
-			unloader.add(this);
-		}
-
-		synchronized void apoptosis() {
-			done = true;
-			interrupt();
-		}
-
-		private Runnable r;
-
-		@Override
-		public void run() {
-			while (true) {
-				synchronized (this) {
-					while (!done && r == null) {
-						try {
-							wait();
-						} catch (InterruptedException e) {
-							if (!done)
-								e.printStackTrace();
-						}
-					}
-				}
-				if (done)
-					break;
-				try {
-					r.run();
-				} catch (Throwable t) {
-					t.printStackTrace();
-				}
-				r = null;
-				synchronized (buffer) {
-					buffer.add(this);
-					buffer.notify();
-				}
-			}
-		}
-
-		synchronized void setR(Runnable r) {
-			this.r = r;
-			notify();
-		}
-	}
-
-	private static int poolSize = -1; // variable for the poolSize
-	private static int bufferSize = 10; // variable for max buffer size (used for overload handeling)
-	private static String overLoadMethod = "BLCK"; // stores the overload handeling method (default block)
-	private static final Queue<PoolThread> buffer = new LinkedList<PoolThread>(); // the queue for the buffer 
-	private static boolean singleThreaded = false;
+	final List<PoolSingleThread> unloader = new LinkedList<PoolSingleThread>(); // unloader is the threadpool
+	private final Queue<Runnable> buffer = new LinkedList<Runnable>(); // the queue for the buffer 
+	private int poolSize = -1; // variable for the poolSize
+	private int bufferSize = -1; // variable for max buffer size (used for overload handeling) 
+	private String overLoadMethod = ""; // stores the overload handeling method (default block)
+	Semaphore poolSemaphore; // this semaphore is used to block the threads when the buffer is empty
+	Semaphore bufferSemaphore; // this semaphore is used to block the threads when the buffer is full
 
 	
-	public void setPoolSize(int poolSize) throws ThreadPoolException {
-		if (ThreadPool.poolSize == -1) {
-			if (poolSize < 1)
-				throw new ThreadPoolException("pool size must be positive");
-			ThreadPool.poolSize = poolSize;
-			init();
-		} else
-			throw new ThreadPoolException("pool already initialized");
+	ThreadPool(int threadNumber, int bufferSize, String overLoadMethod) throws ThreadPoolException {
+		setPoolSize(threadNumber);
+		setBufferSize(bufferSize);
+		setOverLoadMethod(overLoadMethod);
+		init();
 	}
 
-	// method to set buffer size 
-	public void setBufferSize(int bufferSize) throws ThreadPoolException {
-		if (bufferSize < 1)
-			throw new ThreadPoolException("buffer sizemust be positive");
-		ThreadPool.bufferSize = bufferSize;
+	// this method intilizes the pool and store them in buffer 
+	private void init() {
+		// initialize the pool
+		for(int i=0; i<poolSize; i++){
+			PoolSingleThread poolThreadRunnable = new PoolSingleThread(buffer, poolSemaphore, bufferSemaphore);
+			unloader.add(poolThreadRunnable);
+		}
+		// start the threads
+		for(PoolSingleThread runnable : unloader){
+			new Thread(runnable).start();
+		}
 	}
 
-	// method to set overload handeling method 
-	public void setOverLoadMethod(String overLoadMethod) throws ThreadPoolException {
-		if (overLoadMethod == "BLCK" || overLoadMethod == "DRPT" || overLoadMethod == "DRPH")
-			ThreadPool.overLoadMethod = overLoadMethod;
-		else
-			throw new ThreadPoolException("incorrect overload method");
-	}
+	//getters
 
+	// get method for pool size
 	public int getPoolSize() {
 			return poolSize;
 	}
@@ -110,136 +53,51 @@ public class ThreadPool {
 		return overLoadMethod;
 	}
 
-	public void enqueue(Runnable r) {
-		if (singleThreaded)
-			r.run();
-		else {
-			PoolThread t = null;
-			synchronized (buffer) {
-				if (poolSize == -1) {
-					poolSize = Runtime.getRuntime().availableProcessors();
-					init();
-				}
-				while (buffer.isEmpty()) {
-					try {
-						buffer.wait();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-				t = buffer.remove();
-			}
-			t.setR(r);
-			// if (buffer.size() == bufferSize) {
-			// 	overLoadHandle(t, r);
-			// }
-		}
+	// setters
+	// The following method is used to initialize the thread pool
+	// method to set pool size
+	public void setPoolSize(int poolSize) throws ThreadPoolException {
+		if (this.poolSize == -1) {
+			if (poolSize < 1)
+				throw new ThreadPoolException("pool size must be positive");
+			this.poolSize = poolSize;
+			this.poolSemaphore = new Semaphore(0);
+		} else
+			throw new ThreadPoolException("pool already initialized");
 	}
-
-	public void flush() {
-		synchronized (buffer) {
-			while (buffer.size() < bufferSize) {
-				try {
-					buffer.wait();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-
-	// this method intilizes the pool and store them in buffer 
-	private void init() {
-		int capacity = poolSize - bufferSize; // variable to check if pool size fits in buffer 
-		int occupied = bufferSize; // to store how much space is left in the buffer 
 	
-		// intialize pool thread (unloader)
-		for (int i = 0; i < poolSize; i++)
-		{
-			buffer.add(new PoolThread());
-		}
-
-		// store the threads in the buffer as allowed by buffer size 
-		// for (int i = 0; i < bufferSize; i++)
-		// {
-		// 	if (i < poolSize)
-		// 		buffer.add(unloader.get(i));
-		// 	else // if buffer size is bigger than poolsize exit 
-		// 		occupied = i; // the space occupied is less than buffer size 
-		// 		break;
-		// }
-
-		// if (capacity > 0 && buffer.size() == bufferSize) // check if pool size is bigger than buffer size
-		// 	overLoadHandle(capacity); // handle the overload 
+	// method to set buffer size 
+	public void setBufferSize(int bufferSize) throws ThreadPoolException {
+		if (bufferSize < 1)
+			throw new ThreadPoolException("buffer sizemust be positive");
+		this.bufferSize = bufferSize;
+		// initialize the semaphore
+		bufferSemaphore = new Semaphore(bufferSize);
 	}
 
-	// method for handeling the overload of the threads 
-	public void overLoadHandle(int capacity) {
-		int start = poolSize - capacity;
-		switch (overLoadMethod) { 
-			case "BLCK":
-				for (int i = start; i < poolSize; i++) {
-					if (buffer.size() == bufferSize)
-						try {
-							wait();
-						} catch (InterruptedException e) {
-						}
-					else
-						buffer.add(unloader.get(i));
-				}
-						
-				break;
-
-			case "DRPT":
-				for (int i = start; i < poolSize; i++) {
-					if (buffer.size() == bufferSize)
-						unloader.get(i).apoptosis();
-					else
-						buffer.add(unloader.get(i));
-				}
-
-				break;
-					
-			case "DRPH":
-				for (int i = start; i < poolSize; i++) {
-					if (buffer.size() == bufferSize)
-						unloader.get(unloader.indexOf(buffer.remove())).apoptosis();
-					else
-						buffer.add(unloader.get(i));
-				}				
-
-				break;
-				
-			default:
-			for (int i = start; i < poolSize; i++) {
-				if (buffer.size() == bufferSize)
-					try {
-						wait();
-					} catch (InterruptedException e) {
-					}
-				else
-					buffer.add(unloader.get(i));
-			}
-					
-				break;
-
-		}
+	// method to set overload handeling method 
+	public void setOverLoadMethod(String overLoadMethod) throws ThreadPoolException {
+		if (overLoadMethod == "BLCK" || overLoadMethod == "DRPT" || overLoadMethod == "DRPH")
+			this.overLoadMethod = overLoadMethod;
+		else
+			throw new ThreadPoolException("incorrect overload method");
 	}
 
 
-	public void setSingleThreaded(boolean singleThreaded)
-			throws ThreadPoolException {
-		synchronized (buffer) {
-			if (poolSize > -1)
-				throw new ThreadPoolException(
-						"setting single threaded after thread pool initialized");
-			ThreadPool.singleThreaded = singleThreaded;
-			poolSize = 0;
+	public void enqueue(Runnable r) {
+		// add the task to the queue
+		// the overload handling is done here
+		// if the buffer is full then the thread will wait
+		try {
+			System.out.println("The semaphor count is " + bufferSemaphore.availablePermits());
+			bufferSemaphore.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-	}
-
-	public boolean isSingleThreaded() {
-		return singleThreaded;
+		this.buffer.add(r);
+		poolSemaphore.release();
+		System.out.println("task added to buffer");
 	}
 }
 
