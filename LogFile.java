@@ -2,11 +2,12 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.concurrent.Semaphore;
  
 
 public class LogFile {
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, InterruptedException {
 		//Our goal...
 		
 		for (int i = 0; i < 50; i++) {
@@ -14,8 +15,9 @@ public class LogFile {
 		}
 	}
 	
-	public static void logFileOutput(String message) throws IOException {
-		
+	public static void logFileOutput(String message) throws IOException, InterruptedException {
+		Semaphore logSemaphore = new Semaphore(0);
+		logSemaphore.acquire();
 		File log = new File("webserver-log");
 		
 		if(!log.exists()) {
@@ -30,6 +32,7 @@ public class LogFile {
 
 		bw.close();
 		fw.close();
+		logSemaphore.release();
 		
 	}
 
