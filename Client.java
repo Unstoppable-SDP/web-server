@@ -1,29 +1,23 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
+import java.net.*;
+import java.io.*;
+
 public class Client {
+    public static void main(String[] args) throws Exception {
+        URL url = new URL("http://localhost:8085"); // Replace with your server URL
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("GET");
+        int responseCode = con.getResponseCode();
+        System.out.println("Response code: " + responseCode);
 
-    public static void main(String[] args) throws IOException {
-        Socket socket =  new Socket("localhost", 8085);
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
 
-        System.out.println("[CLIENT] Connected to server!");
-        BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
-        PrintWriter out = new PrintWriter(socket.getOutputStream(),true);
-
-        while(true) {
-            System.out.println(">");
-            String command = keyboard.readLine();
-            if(command.equals("quit")) break;
-            out.println(command);
-
-            String serverResponse = input.readLine();
-            System.out.println("Server says: " + serverResponse);        
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
         }
-        socket.close();
-        System.exit(0);
+        in.close();
 
+        System.out.println("Response body: " + response.toString());
     }
 }

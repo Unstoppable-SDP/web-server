@@ -8,18 +8,22 @@ import java.util.concurrent.Semaphore;
 public class ThreadPool {
 
 	final List<PoolSingleThread> unloader = new LinkedList<PoolSingleThread>(); // unloader is the threadpool
-	private final Queue<Runnable> buffer = new LinkedList<Runnable>(); // the queue for the buffer 
+	private final Queue<RequestInfo> buffer = new LinkedList<RequestInfo>(); // the queue for the buffer 
 	private int poolSize = -1; // variable for the poolSize
 	private int bufferSize = -1; // variable for max buffer size (used for overload handeling) 
 	private String overLoadMethod = ""; // stores the overload handeling method (default block)
 	Semaphore poolSemaphore; // this semaphore is used to block the threads when the buffer is empty
 	Semaphore bufferSemaphore; // this semaphore is used to block the threads when the buffer is full
+	Semaphore mutex; // this semaphore is used to make sure that only one thread is accessing the buffer at a time
+	ServeWebRequest sever; // socket for the connection
 
 	
-	ThreadPool(int threadNumber, int bufferSize, String overLoadMethod) throws ThreadPoolException {
+	ThreadPool(int threadNumber, int bufferSize, String overLoadMethod, ServeWebRequest s) throws ThreadPoolException {
 		setPoolSize(threadNumber);
 		setBufferSize(bufferSize);
 		setOverLoadMethod(overLoadMethod);
+		this.sever = s;
+		mutex = new Semaphore(1);
 		init();
 	}
 
@@ -27,7 +31,7 @@ public class ThreadPool {
 	private void init() {
 		// initialize the pool
 		for(int i=0; i<poolSize; i++){
-			PoolSingleThread poolThreadRunnable = new PoolSingleThread(buffer, poolSemaphore, bufferSemaphore);
+			PoolSingleThread poolThreadRunnable = new PoolSingleThread(buffer, poolSemaphore, bufferSemaphore,mutex, sever);
 			unloader.add(poolThreadRunnable);
 		}
 		// start the threads
@@ -36,7 +40,6 @@ public class ThreadPool {
 		}
 	}
 
-	//getters
 
 	// get method for pool size
 	public int getPoolSize() {
@@ -69,7 +72,7 @@ public class ThreadPool {
 	// method to set buffer size 
 	public void setBufferSize(int bufferSize) throws ThreadPoolException {
 		if (bufferSize < 1)
-			throw new ThreadPoolException("buffer sizemust be positive");
+			throw new ThreadPoolException("buffer size must be positive");
 		this.bufferSize = bufferSize;
 		// initialize the semaphore
 		bufferSemaphore = new Semaphore(bufferSize);
@@ -84,23 +87,33 @@ public class ThreadPool {
 	}
 
 
-	public int enqueue(Runnable r) {
-		// add the task to the queue
-		// the overload handling is done here
-		// if the buffer is full then the thread will wait
-		if(bufferSemaphore.availablePermits() == 0 && overLoadMethod == "DRPT")
-			return -1;
+	public void enqueue(RequestInfo info) {
 		try {
-
+		
+		if(bufferSemaphore.availablePermits() == 0){
+			if(overLoadMethod == "DRPT"){
+				System.out.println("task dropped");
+				sever.refuse(info.getSocket(), info.getQueueCount());
+				info.getSocket().close();
+				return;
+			} else if(overLoadMethod == "DRPH"){
+				mutex.acquire();
+				RequestInfo firstReqInfo =buffer.poll();
+				bufferSemaphore.release();
+				mutex.release();
+				sever.refuse(firstReqInfo.getSocket(), firstReqInfo.getQueueCount());
+				firstReqInfo.getSocket().close();
+				return;
+			}
+		}
 			bufferSemaphore.acquire();
-		} catch (InterruptedException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		this.buffer.add(r);
+		this.buffer.add(info);
 		poolSemaphore.release();
 		System.out.println("task added to buffer");
-		return 0;
 	}
 }
 

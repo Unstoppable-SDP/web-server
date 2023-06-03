@@ -4,15 +4,19 @@ import java.util.concurrent.Semaphore;
 public class PoolSingleThread  implements Runnable  {
 
     private Thread thread = null;
-    private Queue<Runnable> taskBuffer;
+    private Queue<RequestInfo> taskBuffer;
     private boolean done = false; // flag to indicate if the thread is done
     private Semaphore poolSemaphore;
     private Semaphore bufferSemaphore;
+    private ServeWebRequest server;
+    private Semaphore mutex;
 
-    public PoolSingleThread (Queue<Runnable> taskBuffer, Semaphore poolSemaphore , Semaphore bufferSemaphore) {
+    public PoolSingleThread (Queue<RequestInfo> taskBuffer, Semaphore poolSemaphore , Semaphore bufferSemaphore,Semaphore mutex, ServeWebRequest s) {
         this.taskBuffer = taskBuffer;
         this.poolSemaphore = poolSemaphore;
         this.bufferSemaphore = bufferSemaphore;
+        this.server = s;
+        this.mutex = mutex;
     }
 
     public void run() {
@@ -21,12 +25,14 @@ public class PoolSingleThread  implements Runnable  {
         try{
             while(!done){
                 poolSemaphore.acquire();
-                System.out.println("The thread start working again");
-                Runnable runnable = (Runnable) taskBuffer.poll();
+                System.out.println("Thread " + thread.getName() + " is running");
+                mutex.acquire();
+                RequestInfo info =taskBuffer.poll();
                 bufferSemaphore.release();
-                // System.out.println("The Semaphore count is " + count.availablePermits());
-                runnable.run();
-            }
+                mutex.release();           
+                Thread.sleep(10000);
+                server.serve(info.getSocket(), info.getQueueCount());
+             }
             }  catch(Exception e){
             //log or otherwise report exception,
             //but keep pool thread alive.

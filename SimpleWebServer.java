@@ -31,7 +31,7 @@ public class SimpleWebServer {
 	static int bufferSize = 1;
 
 	// overload method
-	static String overload = "DRPT";
+	static String overload = "DRPH";
 
 	// Client Connection via Socket Class
 	static Socket connect;
@@ -59,15 +59,16 @@ public class SimpleWebServer {
 				overload = args[3];
 			} 
 
-			pool= new ThreadPool(threadNumber, bufferSize, overload);
 
 			// create a server listening socket
 			ServerSocket serverConnect = new ServerSocket(PORT);
 			System.out.println("Server started.\nListening for connections on port : " + PORT + " ...\n");
 			//write into webserver-log
-			LogFile.logFileOutput("Server started.\nListening for connections on port : " + PORT + " ...\n");
+			// LogFile.logFileOutput("Server started.\nListening for connections on port : " + PORT + " ...\n");
 			// create one instance of the required task
-			// ServeWebRequest s = new ServeWebRequest();
+			ServeWebRequest s = new ServeWebRequest();
+
+			pool= new ThreadPool(threadNumber, bufferSize, overload,s);
 
 			// listen until user halts server execution
 
@@ -79,15 +80,11 @@ public class SimpleWebServer {
 					count++;
 					System.out.println("[SERVER] Connected to client!");
 					//write into webserver-log
-					LogFile.logFileOutput("[SERVER] Connected to client!");
-					ClientHandler clientThread = new ClientHandler(connect,count);
-					int out = pool.enqueue(clientThread);
+					// LogFile.logFileOutput("[SERVER] Connected to client!");
+
+					// create a new thread to handle the request
+					pool.enqueue(new RequestInfo(connect, count));
 					// close the connection 
-					if(out == -1){
-						System.out.println("Buffer is full, The request is dropped");
-						//LogFile.logFileOutput("Buffer is full, , The request is dropped");
-						connect.close();
-					}
 				}
 			} finally {
 				// pool.destroy();
@@ -96,7 +93,7 @@ public class SimpleWebServer {
 
 		} catch (Exception e) {
 			System.err.println("Server Connection error : " + e.getMessage());
-			LogFile.logFileOutput("Server Connection error : " + e.getMessage());
+			// LogFile.logFileOutput("Server Connection error : " + e.getMessage());
 		}
 	}
 }
