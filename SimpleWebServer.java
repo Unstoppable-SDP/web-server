@@ -73,6 +73,7 @@ public class SimpleWebServer {
 
 			try {
 				while (true) {
+					System.out.println("[SERVER] Waiting for client connection request...");
 					// accept client connection request
 					connect = serverConnect.accept(); 
 					count++;
@@ -80,8 +81,13 @@ public class SimpleWebServer {
 					//write into webserver-log
 					LogFile.logFileOutput("[SERVER] Connected to client!");
 					ClientHandler clientThread = new ClientHandler(connect,count);
-					pool.enqueue(clientThread);
-					// close the connection
+					int out = pool.enqueue(clientThread);
+					// close the connection 
+					if(out == -1){
+						System.out.println("Buffer is full, The request is dropped");
+						//LogFile.logFileOutput("Buffer is full, , The request is dropped");
+						connect.close();
+					}
 				}
 			} finally {
 				// pool.destroy();

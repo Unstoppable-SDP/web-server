@@ -84,12 +84,14 @@ public class ThreadPool {
 	}
 
 
-	public void enqueue(Runnable r) {
+	public int enqueue(Runnable r) {
 		// add the task to the queue
 		// the overload handling is done here
 		// if the buffer is full then the thread will wait
+		if(bufferSemaphore.availablePermits() == 0 && overLoadMethod == "DRPT")
+			return -1;
 		try {
-			System.out.println("The semaphor count is " + bufferSemaphore.availablePermits());
+
 			bufferSemaphore.acquire();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -98,9 +100,17 @@ public class ThreadPool {
 		this.buffer.add(r);
 		poolSemaphore.release();
 		System.out.println("task added to buffer");
+		return 0;
 	}
 }
 
+// destroy the thread pool
+// this method is used to destroy the thread pool
+// it will stop all the threads and clear the buffer
+// the threads will be stopped by setting the flag to false
+// the threads will stop when they finish their current task
+// the buffer will be cleared by removing all the tasks from it
+// the semaphore will be released to unblock the threads
 
 class ThreadPoolException extends Exception {
 	public ThreadPoolException(String message) {
