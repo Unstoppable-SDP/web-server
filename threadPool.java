@@ -39,7 +39,9 @@ public class ThreadPool {
 		for(PoolSingleThread runnable : unloader){
 			new Thread(runnable).start();
 		}
-		// mon = new monitor(unloader, buffer, poolSemaphore, bufferSemaphore, poolSize);
+		mon = new monitor(unloader, buffer, poolSemaphore, bufferSemaphore, poolSize, mutex, sever);
+		mon.start();
+		System.out.println("The Monitor is working");
 	}
 
 
