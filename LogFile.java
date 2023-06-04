@@ -7,7 +7,7 @@ import java.util.concurrent.Semaphore;
 
 public class LogFile {
 
-	public static void main(String[] args) throws IOException, InterruptedException {
+	public static void main(String[] args) throws IOException, InterruptedException  {
 		//Our goal...
 		
 		for (int i = 0; i < 50; i++) {
@@ -15,7 +15,7 @@ public class LogFile {
 		}
 	}
 	
-	public static void logFileOutput(String message) throws IOException, InterruptedException {
+	public static void logFileOutput(String message) throws IOException, InterruptedException  {
 		Semaphore logSemaphore = new Semaphore(0);
 		logSemaphore.acquire();
 		File log = new File("webserver-log");

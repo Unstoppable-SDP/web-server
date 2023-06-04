@@ -1,4 +1,5 @@
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -115,25 +116,40 @@ public class ThreadPool {
 		poolSemaphore.release();
 		System.out.println("task added to buffer");
 	}
-	
-	public void destroy() {
+	// destroy the thread pool
+	// this method is used to destroy the thread pool
+	// it will stop all the threads and clear the buffer
+	// the threads will be stopped by setting the flag to false
+	// the threads will stop when they finish their current task
+	// the buffer will be cleared by removing all the tasks from it
+	// the semaphore will be released to unblock the threads
+
+	public void destroy() throws IOException {
+		System.out.println("Thread close: ");
+		try {
 		// interrupt all threads in the pool
-		for (PoolSingleThread thread : unloader) {
-			thread.doStop();
-		}
+			for (PoolSingleThread thread : unloader) {
+				thread.doStop();
+			}
+			
+			while(buffer.size()!=0){
+				mutex.acquire();
+				RequestInfo reqInfo =buffer.poll();
+				mutex.release();
+				sever.refuse(reqInfo.getSocket(), reqInfo.getQueueCount());
+				reqInfo.getSocket().close();
+				System.out.println("Thread close: "+ reqInfo.getQueueCount());
+			}
 		// remove all tasks from the buffer
-		buffer.clear();
-	
+		
+		} catch (InterruptedException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+		}
 	}
 }
 
-// destroy the thread pool
-// this method is used to destroy the thread pool
-// it will stop all the threads and clear the buffer
-// the threads will be stopped by setting the flag to false
-// the threads will stop when they finish their current task
-// the buffer will be cleared by removing all the tasks from it
-// the semaphore will be released to unblock the threads
+
 
 
 class ThreadPoolException extends Exception {
