@@ -21,7 +21,7 @@ public class PoolSingleThread  implements Runnable  {
 
     public void run() {
         this.thread = Thread.currentThread();
-        System.out.println("Thread Created " + thread.getName());
+        // System.out.println("Thread Created " + thread.getName());
         try{
             while(!done){
                 poolSemaphore.acquire();
@@ -36,8 +36,14 @@ public class PoolSingleThread  implements Runnable  {
             }  catch(Exception e){
             //log or otherwise report exception,
             //but keep pool thread alive.
+            System.out.println(e);
         }
 
+    }
+
+    // method for checking the life of the threads 
+    public boolean isAlive() {
+        return thread.isAlive();
     }
     
     public synchronized void doStop(){
@@ -49,5 +55,6 @@ public class PoolSingleThread  implements Runnable  {
     public synchronized boolean isStopped(){
         return done;
     }
+
     
 }
