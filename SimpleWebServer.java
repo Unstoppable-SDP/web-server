@@ -47,7 +47,7 @@ public class SimpleWebServer {
 	// by using a thread pool
 	//
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 	
 		try {
 
@@ -69,7 +69,15 @@ public class SimpleWebServer {
 			ServeWebRequest s = new ServeWebRequest();
 
 			pool= new ThreadPool(threadNumber, bufferSize, overload,s);
-
+			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+				System.out.println("Shutting down...");
+				try {
+					pool.destroy();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}));
 			// listen until user halts server execution
 
 			try {
@@ -87,13 +95,12 @@ public class SimpleWebServer {
 					// close the connection 
 				}
 			} finally {
-				pool.destroy();
 				serverConnect.close();
 			}
 
 		} catch (Exception e) {
 			System.err.println("Server Connection error : " + e.getMessage());
-			// LogFile.logFileOutput("Server Connection error : " + e.getMessage());
+			LogFile.logFileOutput("Server Connection error : " + e.getMessage());
 		}
 	}
 }
