@@ -39,6 +39,11 @@ public class PoolSingleThread  implements Runnable  {
         }
 
     }
+
+    // method for checking the life of the threads 
+    public boolean isAlive() {
+        return thread.isAlive();
+    }
     
     public synchronized void doStop(){
         done = true;

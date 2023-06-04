@@ -16,6 +16,7 @@ public class ThreadPool {
 	Semaphore bufferSemaphore; // this semaphore is used to block the threads when the buffer is full
 	Semaphore mutex; // this semaphore is used to make sure that only one thread is accessing the buffer at a time
 	ServeWebRequest sever; // socket for the connection
+	monitor mon;
 
 	
 	ThreadPool(int threadNumber, int bufferSize, String overLoadMethod, ServeWebRequest s) throws ThreadPoolException {
@@ -38,6 +39,7 @@ public class ThreadPool {
 		for(PoolSingleThread runnable : unloader){
 			new Thread(runnable).start();
 		}
+		// mon = new monitor(unloader, buffer, poolSemaphore, bufferSemaphore, poolSize);
 	}
 
 
