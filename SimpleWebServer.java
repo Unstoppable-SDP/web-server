@@ -31,7 +31,7 @@ public class SimpleWebServer {
 	static int bufferSize = 1;
 
 	// overload method
-	static String overload = "DRPT";
+	static String overload = "DRPH";
 
 	// Client Connection via Socket Class
 	static Socket connect;
@@ -59,29 +59,32 @@ public class SimpleWebServer {
 				overload = args[3];
 			} 
 
-			pool= new ThreadPool(threadNumber, bufferSize, overload);
 
 			// create a server listening socket
 			ServerSocket serverConnect = new ServerSocket(PORT);
 			System.out.println("Server started.\nListening for connections on port : " + PORT + " ...\n");
 			//write into webserver-log
-			LogFile.logFileOutput("Server started.\nListening for connections on port : " + PORT + " ...\n");
+			// LogFile.logFileOutput("Server started.\nListening for connections on port : " + PORT + " ...\n");
 			// create one instance of the required task
-			// ServeWebRequest s = new ServeWebRequest();
+			ServeWebRequest s = new ServeWebRequest();
+
+			pool= new ThreadPool(threadNumber, bufferSize, overload,s);
 
 			// listen until user halts server execution
 
 			try {
 				while (true) {
+					System.out.println("[SERVER] Waiting for client connection request...");
 					// accept client connection request
 					connect = serverConnect.accept(); 
 					count++;
 					System.out.println("[SERVER] Connected to client!");
 					//write into webserver-log
-					LogFile.logFileOutput("[SERVER] Connected to client!");
-					ClientHandler clientThread = new ClientHandler(connect,count);
-					pool.enqueue(clientThread);
-					// close the connection
+					// LogFile.logFileOutput("[SERVER] Connected to client!");
+
+					// create a new thread to handle the request
+					pool.enqueue(new RequestInfo(connect, count));
+					// close the connection 
 				}
 			} finally {
 				pool.destroy();
