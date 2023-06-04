@@ -3,6 +3,18 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
+ /**
+ * @(#)ThreadPool.java
+ *
+ * @authors
+ * by Dinah Alshibi
+ * @version 1.00 2023/6/4
+ * The monitor class represents a thread that monitors
+ * the status of the threads in the thread pool managed by the
+ * ThreadPool class. It checks if any of the threads have finished
+ * running and replaces them with new threads if needed.
+ */
+
 public class monitor extends Thread {
     private Queue<RequestInfo> buffer = new LinkedList<RequestInfo>(); // the queue for the buffer
     Semaphore poolSemaphore; // this semaphore is used to block the threads when the buffer is empty

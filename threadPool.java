@@ -5,7 +5,19 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
-// the current implementation uses monitor we should use semaphore instead
+ /**
+ * @(#)ThreadPool.java
+ *
+ * @authors
+ * by Hind Alrashid, Marwah Bakoor, and Dinah Alshibi
+ * @version 1.00 2023/6/4
+ * The ThreadPool class represents a thread pool that manages a 
+ * fixed number of threads to handle multiple client requests 
+ * in a server application. It uses a buffer to store incoming 
+ * requests and a semaphore to manage thread concurrency.
+ */
+
+
 public class ThreadPool {
 
 	final List<PoolSingleThread> unloader = new LinkedList<PoolSingleThread>(); // unloader is the threadpool

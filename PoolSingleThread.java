@@ -1,6 +1,23 @@
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
+
+ /**
+ * @(#)PoolSingleThread.java
+ *
+ * @authors
+ * by Hind Alrashid, Marwah Bakoor, and Dinah Alshibi
+ * @version 1.00 2023/6/4
+ * The PoolSingleThread class represents an individual thread 
+ * in the thread pool managed by the ThreadPool class.
+ * Each thread is responsible for dequeuing requests from 
+ * the buffer and serving them using the ServeWebRequest class.
+ * The class implements the Runnable interface and provides methods 
+ * for starting, stopping, and checking the status of the thread.
+ */
+
+
+
 public class PoolSingleThread  implements Runnable  {
 
     private Thread thread = null;

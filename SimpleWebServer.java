@@ -8,6 +8,7 @@ import java.net.Socket;
  *
  * @author Adapted from SSaurel's Blog
  * by Dr. Abdulghani M. Al-Qasimi
+ * @Editor Marwah Bakoor, Hind Alrashid, Dinah Alshibi
  * @version 1.00 2020/8/7
  *
  * This is a simple web server for teaching purposes.
