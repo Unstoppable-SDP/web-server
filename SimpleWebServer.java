@@ -84,13 +84,13 @@ public class SimpleWebServer {
 					// close the connection
 				}
 			} finally {
-				// pool.destroy();
+				pool.destroy();
 				serverConnect.close();
 			}
 
 		} catch (Exception e) {
 			System.err.println("Server Connection error : " + e.getMessage());
-			LogFile.logFileOutput("Server Connection error : " + e.getMessage());
+			// LogFile.logFileOutput("Server Connection error : " + e.getMessage());
 		}
 	}
 }

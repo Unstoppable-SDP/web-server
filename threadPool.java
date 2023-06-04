@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
-// the current implementation is used monitor we should use semaphore instead
+// the current implementation uses monitor we should use semaphore instead
 public class ThreadPool {
 
 	final List<PoolSingleThread> unloader = new LinkedList<PoolSingleThread>(); // unloader is the threadpool
@@ -99,7 +99,18 @@ public class ThreadPool {
 		poolSemaphore.release();
 		System.out.println("task added to buffer");
 	}
+	
+	public void destroy() {
+		// interrupt all threads in the pool
+		for (PoolSingleThread thread : unloader) {
+			thread.doStop();
+		}
+		// remove all tasks from the buffer
+		buffer.clear();
+	
+	}
 }
+
 
 
 class ThreadPoolException extends Exception {
