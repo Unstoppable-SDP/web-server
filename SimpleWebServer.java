@@ -24,14 +24,14 @@ public class SimpleWebServer {
 	static int PORT = 8085;
 
 	// thread number
-	static int threadNumber = 2;
+	static int threadNumber = 7;
 
 	// buffer size
 
-	static int bufferSize = 1;
+	static int bufferSize = 10;
 
 	// overload method
-	static String overload = "DRPH";
+	static String overload = "BLCK";
 
 	// Client Connection via Socket Class
 	static Socket connect;
@@ -48,23 +48,24 @@ public class SimpleWebServer {
 	//
 
 	public static void main(String[] args) throws Exception {
-	
+	    //System.out.println(PORT+" "+threadNumber+" "+bufferSize+" "+overload);
 		try {
-
-			// get the port number, thread number buffer size and overload method
-			if (args.length > 0) {
+			if (args.length >1) {
 				PORT = Integer.parseInt(args[0]);
+			}if (args.length >2){
 				threadNumber = Integer.parseInt(args[1]);
+			}if (args.length >3){
 				bufferSize = Integer.parseInt(args[2]);
+			}if (args.length >4){
 				overload = args[3];
-			} 
-
-
+			}
+			//System.out.println(PORT+" "+threadNumber+" "+bufferSize+" "+overload);
 			// create a server listening socket
 			ServerSocket serverConnect = new ServerSocket(PORT);
+			
 			System.out.println("Server started.\nListening for connections on port : " + PORT + " ...\n");
 			//write into webserver-log
-			// LogFile.logFileOutput("Server started.\nListening for connections on port : " + PORT + " ...\n");
+			LogFile.logFileOutput("Server started.\nListening for connections on port : " + PORT + " ...\n");
 			// create one instance of the required task
 			ServeWebRequest s = new ServeWebRequest();
 
@@ -88,7 +89,7 @@ public class SimpleWebServer {
 					count++;
 					System.out.println("[SERVER] Connected to client!");
 					//write into webserver-log
-					// LogFile.logFileOutput("[SERVER] Connected to client!");
+					LogFile.logFileOutput("[SERVER] Connected to client!");
 
 					// create a new thread to handle the request
 					pool.enqueue(new RequestInfo(connect, count));

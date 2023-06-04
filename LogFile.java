@@ -6,7 +6,7 @@ import java.util.concurrent.Semaphore;
  
 
 public class LogFile {
-
+	static Semaphore logSemaphore = new Semaphore(1);
 	public static void main(String[] args) throws IOException, InterruptedException  {
 		//Our goal...
 		
@@ -16,9 +16,9 @@ public class LogFile {
 	}
 	
 	public static void logFileOutput(String message) throws IOException, InterruptedException  {
-		Semaphore logSemaphore = new Semaphore(0);
+		
 		logSemaphore.acquire();
-		File log = new File("webserver-log");
+		File log = new File("webserver-log.txt");
 		
 		if(!log.exists()) {
 			log.createNewFile();
