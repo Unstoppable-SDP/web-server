@@ -16,6 +16,8 @@ import java.util.concurrent.Semaphore;
  */
 
 public class monitor extends Thread {
+    private Thread thread = null;
+    private boolean done = false; // flag to indicate if the thread is done
     private Queue<RequestInfo> buffer = new LinkedList<RequestInfo>(); // the queue for the buffer
     Semaphore poolSemaphore; // this semaphore is used to block the threads when the buffer is empty
 	Semaphore bufferSemaphore; // this semaphore is used to block the threads when the buffer is full
@@ -35,7 +37,8 @@ public class monitor extends Thread {
     }
 
     public void run() {
-        while(!isInterrupted()) {
+        this.thread = Thread.currentThread();
+        while(!done) {
             for(int i = 0; i < poolSize; i++) {
                 PoolSingleThread oldThread = unloader.get(i);
                 if(oldThread.isAlive())
@@ -48,6 +51,12 @@ public class monitor extends Thread {
                 }
             }
         }
+    }
+
+    public synchronized void doStop(){
+        done = true;
+        //break pool thread out of dequeue() call.
+        this.thread.interrupt();
     }
 
 }

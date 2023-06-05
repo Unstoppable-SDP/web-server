@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
@@ -67,11 +66,12 @@ public class SimpleWebServer {
 			//System.out.println(PORT+" "+threadNumber+" "+bufferSize+" "+overload);
 			// create a server listening socket
 			ServerSocket serverConnect = new ServerSocket(PORT);
-
+			
 			// log file
 			LogFile.redirectConsoleToFile("my-log-file.txt");
-			
-			System.out.println("Server started.\nListening for connections on port : " + PORT + " ...\n");
+			//System.out.println(serverConnect.getLocalPort()+" "+ serverConnect.getInetAddress()+" "+serverConnect.getLocalSocketAddress()+" ");
+
+			System.out.println(new Date()+": Server started.\nListening for connections on port : " + PORT + " ...\n");
 			//write into webserver-log
 			// create one instance of the required task
 			ServeWebRequest s = new ServeWebRequest();
@@ -81,6 +81,10 @@ public class SimpleWebServer {
 				System.out.println(new Date()+" Received shutdown signal ...");
 				try {
 					pool.destroy();
+					System.out.println(new Date()+" Done. Total was "+count+" threads.");
+					//serverConnect.close();
+					System.out.println(new Date()+" Server connection socket closed.");
+					System.out.println(new Date()+" The server exits.");
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					//e.printStackTrace();
@@ -97,11 +101,11 @@ public class SimpleWebServer {
 					count++;
 					System.out.println("[SERVER] Connected to client!");
 					//write into webserver-log
-
+					System.out.println("Connecton "+count+" opened. ("+new Date()+")");
 					// create a new thread to handle the request
 					pool.enqueue(new RequestInfo(connect, count));
 					// close the connection 
-					System.out.println("Connecton "+count+" opened. ("+new Date()+")");
+					
 				}
 			} finally {
 				serverConnect.close();
