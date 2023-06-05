@@ -46,6 +46,31 @@ To clean the project directory by removing any compiled .class files, type:
 make clean
 ```
 
+## Deficulties
+- How to handle the overload 
+- How to avoid busy waiting
+- How to avoid deadlock
+- how to maintain the synchronization of the threads
+- how to replace dead threads
+- how to clean after server closes
+- how to print in the log file
+- how to test each requirement 
+
+## Designed Requirements 
+- to develop a network application program
+- to turn the provided single thread server into a multithread server
+- to bulid a threadpool class for use in the server
+- to utilize the created threadpool class and a buffer queue to allocate for new request while they wait for an available thread to be serviced
+- to use blocking techniques and overload handling methods to accommodate for when the buffer is empty and full, respectively
+- to use semaphores for mutual exclusion and synchronization 
+- a monitering thread must be used for monitering the health of the threads and replacing any that are dead
+- to close the threadpool when the server stops
+- to create a log function that pronts all print statements in a log file
+- to measure the performance of the server through Apache Benchmark
+
+## Missed Requirements
+- There are no missed requirment that we are aware of 
+
 ## Classes
 
 ### ThreadPool
