@@ -1,7 +1,4 @@
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.concurrent.Semaphore;
  /**
  * @(#)LogFile.java
@@ -16,36 +13,28 @@ import java.util.concurrent.Semaphore;
  * the log file at a time.
  */
 
-
 public class LogFile {
-	static Semaphore logSemaphore = new Semaphore(1);
-	public static void main(String[] args) throws IOException, InterruptedException  {
-		//Our goal...
-		
-		for (int i = 0; i < 50; i++) {
-			logFileOutput("I = " + i);
-		}
-	}
-	
-	public static void logFileOutput(String message) throws IOException, InterruptedException  {
-		
-		logSemaphore.acquire();
-		File log = new File("webserver-log.txt");
-		
-		if(!log.exists()) {
-			log.createNewFile();
-		}
-		
-		FileWriter fw = new FileWriter(log, true);
-		BufferedWriter bw = new BufferedWriter(fw);
-		
-		bw.write(message);
-		bw.newLine();
+    private static final Semaphore semaphore = new Semaphore(1);
 
-		bw.close();
-		fw.close();
-		logSemaphore.release();
-		
-	}
+    public static void redirectConsoleToFile(String logFileName) throws IOException {
+        File log = new File(logFileName);
 
+        if(!log.exists()) {
+            log.createNewFile();
+        }
+
+        PrintStream logPrintStream = new PrintStream(new FileOutputStream(log, true));
+        System.setOut(logPrintStream);
+    }
+
+    public static void log(String message) {
+        try {
+            semaphore.acquire();
+            System.out.println(message);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            semaphore.release();
+        }
+    }
 }

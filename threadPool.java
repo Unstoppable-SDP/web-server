@@ -19,7 +19,7 @@ import java.util.concurrent.Semaphore;
 
 
 public class ThreadPool {
-
+	// The thread pool Variables
 	final List<PoolSingleThread> unloader = new LinkedList<PoolSingleThread>(); // unloader is the threadpool
 	private final Queue<RequestInfo> buffer = new LinkedList<RequestInfo>(); // the queue for the buffer 
 	private int poolSize = -1; // variable for the poolSize
@@ -31,17 +31,26 @@ public class ThreadPool {
 	ServeWebRequest sever; // socket for the connection
 	monitor mon;
 
-	
+	// constructor
 	ThreadPool(int threadNumber, int bufferSize, String overLoadMethod, ServeWebRequest s) throws ThreadPoolException {
 		setPoolSize(threadNumber);
 		setBufferSize(bufferSize);
 		setOverLoadMethod(overLoadMethod);
 		this.sever = s;
+
+		// initialize the semaphores
+		this.poolSemaphore = new Semaphore(0);
+		this.bufferSemaphore = new Semaphore(bufferSize);
 		mutex = new Semaphore(1);
 		init();
 	}
 
-	// this method intilizes the pool and store them in buffer 
+	// Methods
+
+	/**
+	 * This method should be called at the beginning of the program
+	 * It initializes the thread pool and starts the threads
+	 */
 	private void init() {
 		// initialize the pool
 		for(int i=0; i<poolSize; i++){
@@ -52,50 +61,71 @@ public class ThreadPool {
 		for(PoolSingleThread runnable : unloader){
 			new Thread(runnable).start();
 		}
+		// start the monitor
 		mon = new monitor(unloader, buffer, poolSemaphore, bufferSemaphore, poolSize, mutex, sever);
 		mon.start();
-		System.out.println("The Monitor is working");
 	}
 
+	// Getters Methods
 
-	// get method for pool size
+	/**
+	 * This method returns the pool size
+	 * @return poolSize
+	 */
 	public int getPoolSize() {
 			return poolSize;
 	}
 
-	// get method for buffer size 
+	/**
+	 * This method returns the buffer size
+	 * @return bufferSize
+	 */
 	public int getBufferSize() {
 		return bufferSize;
 	}
 
-	// get method for overload method 
+	/**
+	 * This method returns the overload method
+	 * @return overLoadMethod
+	 */
 	public String getOverLoadMethod () {
 		return overLoadMethod;
 	}
 
-	// setters
-	// The following method is used to initialize the thread pool
-	// method to set pool size
+	// Setters Methods
+
+
+	/**
+	 * This method sets the pool size
+	 * @param poolSize
+	 * @throws ThreadPoolException
+	 */
 	public void setPoolSize(int poolSize) throws ThreadPoolException {
 		if (this.poolSize == -1) {
 			if (poolSize < 1)
 				throw new ThreadPoolException("pool size must be positive");
 			this.poolSize = poolSize;
-			this.poolSemaphore = new Semaphore(0);
 		} else
 			throw new ThreadPoolException("pool already initialized");
 	}
-	
-	// method to set buffer size 
+
+	/**
+	 * This method sets the buffer size
+	 * @param bufferSize
+	 * @throws ThreadPoolException
+	 */
+
 	public void setBufferSize(int bufferSize) throws ThreadPoolException {
 		if (bufferSize < 1)
 			throw new ThreadPoolException("buffer size must be positive");
 		this.bufferSize = bufferSize;
-		// initialize the semaphore
-		bufferSemaphore = new Semaphore(bufferSize);
 	}
 
-	// method to set overload handeling method 
+	/**
+	 * This method sets the overload method
+	 * @param bufferSize
+	 * @throws ThreadPoolException
+	 */
 	public void setOverLoadMethod(String overLoadMethod) throws ThreadPoolException {
 		if (overLoadMethod == "BLCK" || overLoadMethod == "DRPT" || overLoadMethod == "DRPH")
 			this.overLoadMethod = overLoadMethod;
@@ -103,7 +133,15 @@ public class ThreadPool {
 			throw new ThreadPoolException("incorrect overload method");
 	}
 
-
+	/**
+	 * This method adds a request to the buffer
+	 * it will block, drop, or drop head based on the overload method
+	 * if the buffer is full and the overload method is block, the thread will block
+	 * if the buffer is full and the overload method is drop, the thread will drop the request
+	 * if the buffer is full and the overload method is drop head, the thread will drop the first request in the buffer
+	 * @param info the request to be added to the buffer
+	 * @throws IOException
+	 */
 	public void enqueue(RequestInfo info) {
 		try {
 		
@@ -120,34 +158,31 @@ public class ThreadPool {
 				mutex.release();
 				sever.refuse(firstReqInfo.getSocket(), firstReqInfo.getQueueCount());
 				firstReqInfo.getSocket().close();
-				return;
 			}
 		}
 			bufferSemaphore.acquire();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		this.buffer.add(info);
 		poolSemaphore.release();
 		System.out.println("task added to buffer");
 	}
-	// destroy the thread pool
-	// this method is used to destroy the thread pool
-	// it will stop all the threads and clear the buffer
-	// the threads will be stopped by setting the flag to false
-	// the threads will stop when they finish their current task
-	// the buffer will be cleared by removing all the tasks from it
-	// the semaphore will be released to unblock the threads
+
+	/**
+	 * This method closes the thread pool
+	 * it will interrupt all threads in the pool and remove all tasks from the buffer
+	 * @throws IOException
+	 */
 
 	public void destroy() throws IOException {
 		System.out.println("Thread close: ");
 		try {
-		// interrupt all threads in the pool
+			// interrupt all threads in the pool
 			for (PoolSingleThread thread : unloader) {
 				thread.doStop();
 			}
-			
+			// remove all tasks from the buffer
 			while(buffer.size()!=0){
 				mutex.acquire();
 				RequestInfo reqInfo =buffer.poll();
@@ -155,9 +190,7 @@ public class ThreadPool {
 				sever.refuse(reqInfo.getSocket(), reqInfo.getQueueCount());
 				reqInfo.getSocket().close();
 				System.out.println("Thread close: "+ reqInfo.getQueueCount());
-			}
-		// remove all tasks from the buffer
-		
+			}		
 		} catch (InterruptedException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();

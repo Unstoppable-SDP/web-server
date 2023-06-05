@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Date;
 
 
 /**
@@ -42,11 +43,14 @@ public class SimpleWebServer {
 
 	private static ThreadPool pool;
 
-	// convert the following method to multi-threaded
-	// to handle multiple clients simultaneously
-	// and to improve the performance of the server
-	// by using a thread pool
-	//
+	/**
+	 * Main method
+	 * This method is the program entry point
+	 * It creates a server socket to listen for client connection requests
+	 * It creates a thread pool to handle the requests
+	 * It creates a task to handle the requests
+	 * @param args the command line arguments
+	 */
 
 	public static void main(String[] args) throws Exception {
 	    //System.out.println(PORT+" "+threadNumber+" "+bufferSize+" "+overload);
@@ -63,10 +67,12 @@ public class SimpleWebServer {
 			//System.out.println(PORT+" "+threadNumber+" "+bufferSize+" "+overload);
 			// create a server listening socket
 			ServerSocket serverConnect = new ServerSocket(PORT);
+
+			// log file
+			LogFile.redirectConsoleToFile("my-log-file.txt");
 			
 			System.out.println("Server started.\nListening for connections on port : " + PORT + " ...\n");
 			//write into webserver-log
-			LogFile.logFileOutput("Server started.\nListening for connections on port : " + PORT + " ...\n");
 			// create one instance of the required task
 			ServeWebRequest s = new ServeWebRequest();
 
@@ -90,11 +96,11 @@ public class SimpleWebServer {
 					count++;
 					System.out.println("[SERVER] Connected to client!");
 					//write into webserver-log
-					LogFile.logFileOutput("[SERVER] Connected to client!");
 
 					// create a new thread to handle the request
 					pool.enqueue(new RequestInfo(connect, count));
 					// close the connection 
+					System.out.println("Connecton "+count+" opened. ("+new Date()+")");
 				}
 			} finally {
 				serverConnect.close();
@@ -102,7 +108,6 @@ public class SimpleWebServer {
 
 		} catch (Exception e) {
 			System.err.println("Server Connection error : " + e.getMessage());
-			LogFile.logFileOutput("Server Connection error : " + e.getMessage());
 		}
 	}
 }

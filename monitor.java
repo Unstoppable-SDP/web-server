@@ -23,7 +23,6 @@ public class monitor extends Thread {
 	ServeWebRequest server; // socket for the connection
     List<PoolSingleThread> unloader;
     int poolSize;
-    private volatile boolean done = false;
     
     monitor(List<PoolSingleThread> unloader, Queue<RequestInfo> buffer, Semaphore poolSemaphore, Semaphore bufferSemaphore, int poolSize, Semaphore mutex, ServeWebRequest server) {
         this.unloader = unloader;
@@ -36,7 +35,7 @@ public class monitor extends Thread {
     }
 
     public void run() {
-        while(! isInterrupted()) {
+        while(!isInterrupted()) {
             for(int i = 0; i < poolSize; i++) {
                 PoolSingleThread oldThread = unloader.get(i);
                 if(oldThread.isAlive())

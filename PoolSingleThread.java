@@ -48,6 +48,7 @@ public class PoolSingleThread  implements Runnable  {
                 bufferSemaphore.release();
                 mutex.release();           
                 Thread.sleep(10000);
+                
                 server.serve(info.getSocket(), info.getQueueCount());
              }
             }  catch(Exception e){
