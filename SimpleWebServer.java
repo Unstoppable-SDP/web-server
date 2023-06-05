@@ -1,6 +1,7 @@
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
+import java.util.Scanner;
 
 
 /**
@@ -52,18 +53,58 @@ public class SimpleWebServer {
 	 */
 
 	public static void main(String[] args) throws Exception {
-	    //System.out.println(PORT+" "+threadNumber+" "+bufferSize+" "+overload);
+	    System.out.println(PORT+" "+threadNumber+" "+bufferSize+" "+overload);
+		Scanner scanner=new Scanner(System.in);
 		try {
-			if (args.length >1) {
+			if (args.length >=1) {
 				PORT = Integer.parseInt(args[0]);
-			}if (args.length >2){
+			}if (args.length >=2){
 				threadNumber = Integer.parseInt(args[1]);
-			}if (args.length >3){
+			}if (args.length >=3){
 				bufferSize = Integer.parseInt(args[2]);
-			}if (args.length >4){
+			}if (args.length >=4){
 				overload = args[3];
 			}
-			//System.out.println(PORT+" "+threadNumber+" "+bufferSize+" "+overload);
+			if (args.length ==0) {
+				System.out.println("Enter the port number or press enter for deafult (Port=8085)");
+				String por= scanner.nextLine().trim();
+				if(!por.isEmpty()){
+					try{
+						PORT=Integer.parseInt(por);
+					}catch(NumberFormatException e){
+						System.out.println("Invalid port number");
+					}
+				}
+				System.out.println("Enter the number of thread or press enter for deafult (Number of thread =7)");
+				String thr= scanner.nextLine().trim();
+				if(!thr.isEmpty()){
+					try{
+						threadNumber=Integer.parseInt(thr);
+					}catch(NumberFormatException e){
+						System.out.println("Invalid number of thread");
+					}
+				}
+				System.out.println("Enter the buffer size or press enter for deafult (Buffer Size =10)");
+				String buf= scanner.nextLine().trim();
+				if(!buf.isEmpty()){
+					try{
+						bufferSize=Integer.parseInt(buf);
+					}catch(NumberFormatException e){
+						System.out.println("Invalid buffer size");
+					}
+				}
+				System.out.println("Enter the overload method or press enter for deafult (overload = BLCK)");
+				String over= scanner.nextLine().trim();
+				if(!over.isEmpty()){
+					if(over.equals("BLCK")|| over.equals("DRPT")|| over.equals("DRPH")){
+						overload=over;
+					}else {
+						System.out.println("Invalid option");
+					}
+					
+				}
+			}
+			System.out.println(PORT+" "+threadNumber+" "+bufferSize+" "+overload);
 			// create a server listening socket
 			ServerSocket serverConnect = new ServerSocket(PORT);
 			

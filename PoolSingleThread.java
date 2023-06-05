@@ -47,7 +47,7 @@ public class PoolSingleThread  implements Runnable  {
                 RequestInfo info =taskBuffer.poll();
                 bufferSemaphore.release();
                 mutex.release();           
-                //Thread.sleep(10000);
+                //Thread.sleep(1000000);
                 
                 server.serve(info.getSocket(), info.getQueueCount());
              }

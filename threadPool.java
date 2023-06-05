@@ -128,7 +128,7 @@ public class ThreadPool {
 	 * @throws ThreadPoolException
 	 */
 	public void setOverLoadMethod(String overLoadMethod) throws ThreadPoolException {
-		if (overLoadMethod == "BLCK" || overLoadMethod == "DRPT" || overLoadMethod == "DRPH")
+		if (overLoadMethod.equals("BLCK")|| overLoadMethod.equals("DRPT")|| overLoadMethod.equals("DRPH"))
 			this.overLoadMethod = overLoadMethod;
 		else
 			throw new ThreadPoolException("incorrect overload method");
@@ -147,20 +147,20 @@ public class ThreadPool {
 		try {
 		
 		if(bufferSemaphore.availablePermits() == 0){
-			if(overLoadMethod == "DRPT"){
-				System.out.println("task dropped");
+			if(overLoadMethod.equals("DRPT")){
+				//System.out.println("task dropped");
 				sever.refuse(info.getSocket(), info.getQueueCount());
 				info.getSocket().close();
-				System.out.println("problem serving request Socket[addr="+info.getSocket().getInetAddress()+",port="+info.getSocket().getLocalPort()+",localport="+SimpleWebServer.PORT+"]");
+				System.out.println("problem serving request Socket[addr="+info.getSocket().getInetAddress()+",port="+info.getSocket()+",localport="+SimpleWebServer.PORT+"]");
 				//info.getSocket().getInetAddress();
 				return;
-			} else if(overLoadMethod == "DRPH"){
+			} else if(overLoadMethod.equals("DRPH")){
 				mutex.acquire();
 				RequestInfo firstReqInfo =buffer.poll();
 				bufferSemaphore.release();
 				mutex.release();
 				sever.refuse(firstReqInfo.getSocket(), firstReqInfo.getQueueCount());
-				System.out.println("problem serving request Socket[addr="+firstReqInfo.getSocket().getInetAddress()+",port="+firstReqInfo.getSocket().getLocalPort()+",localport="+SimpleWebServer.PORT+"]");
+				System.out.println("problem serving request Socket[addr="+firstReqInfo.getSocket().getInetAddress()+",port="+firstReqInfo.getSocket()+",localport="+SimpleWebServer.PORT+"]");
 				firstReqInfo.getSocket().close();
 			}
 		}
