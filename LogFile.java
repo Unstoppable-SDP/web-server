@@ -31,7 +31,7 @@ public class LogFile {
         try {
             semaphore.acquire();
             System.out.println(message);
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             semaphore.release();

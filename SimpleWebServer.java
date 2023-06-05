@@ -78,13 +78,14 @@ public class SimpleWebServer {
 
 			pool= new ThreadPool(threadNumber, bufferSize, overload,s);
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-				System.out.println("Shutting down...");
+				System.out.println(new Date()+" Received shutdown signal ...");
 				try {
 					pool.destroy();
-				} catch (IOException e) {
+				} catch (Exception e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					//e.printStackTrace();
 				}
+				
 			}));
 			// listen until user halts server execution
 

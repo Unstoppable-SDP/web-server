@@ -47,14 +47,14 @@ public class PoolSingleThread  implements Runnable  {
                 RequestInfo info =taskBuffer.poll();
                 bufferSemaphore.release();
                 mutex.release();           
-                Thread.sleep(10000);
+                //Thread.sleep(10000);
                 
                 server.serve(info.getSocket(), info.getQueueCount());
              }
             }  catch(Exception e){
             //log or otherwise report exception,
             //but keep pool thread alive.
-            System.out.println(e);
+           // System.out.println(e);
         }
 
     }
