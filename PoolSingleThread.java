@@ -1,3 +1,4 @@
+import java.util.Date;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
@@ -42,9 +43,10 @@ public class PoolSingleThread  implements Runnable  {
         try{
             while(!done){
                 poolSemaphore.acquire();
-                System.out.println("Thread " + thread.getName() + " is running");
+                //System.out.println("Thread " + thread.getName() + " is running");
                 mutex.acquire();
                 RequestInfo info =taskBuffer.poll();
+                System.out.println("Connecton "+info.getQueueCount()+" opened in "+thread.getName()+". ("+new Date()+")");
                 bufferSemaphore.release();
                 mutex.release();           
                 //Thread.sleep(1000000);

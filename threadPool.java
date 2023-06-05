@@ -151,7 +151,7 @@ public class ThreadPool {
 				//System.out.println("task dropped");
 				sever.refuse(info.getSocket(), info.getQueueCount());
 				info.getSocket().close();
-				System.out.println("problem serving request Socket[addr="+info.getSocket().getInetAddress()+",port="+info.getSocket()+",localport="+SimpleWebServer.PORT+"]");
+				System.out.println("problem serving request "+info.getSocket());
 				//info.getSocket().getInetAddress();
 				return;
 			} else if(overLoadMethod.equals("DRPH")){
@@ -160,7 +160,7 @@ public class ThreadPool {
 				bufferSemaphore.release();
 				mutex.release();
 				sever.refuse(firstReqInfo.getSocket(), firstReqInfo.getQueueCount());
-				System.out.println("problem serving request Socket[addr="+firstReqInfo.getSocket().getInetAddress()+",port="+firstReqInfo.getSocket()+",localport="+SimpleWebServer.PORT+"]");
+				System.out.println("problem serving request "+firstReqInfo.getSocket());
 				firstReqInfo.getSocket().close();
 			}
 		}

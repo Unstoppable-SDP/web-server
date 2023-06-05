@@ -142,7 +142,7 @@ public class SimpleWebServer {
 					count++;
 					System.out.println("[SERVER] Connected to client!");
 					//write into webserver-log
-					System.out.println("Connecton "+count+" opened. ("+new Date()+")");
+					
 					// create a new thread to handle the request
 					pool.enqueue(new RequestInfo(connect, count));
 					// close the connection 
