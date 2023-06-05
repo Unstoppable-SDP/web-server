@@ -151,7 +151,8 @@ public class ThreadPool {
 				System.out.println("task dropped");
 				sever.refuse(info.getSocket(), info.getQueueCount());
 				info.getSocket().close();
-				
+				System.out.println("problem serving request Socket[addr="+info.getSocket().getInetAddress()+",port="+info.getSocket().getLocalPort()+",localport="+SimpleWebServer.PORT+"]");
+				//info.getSocket().getInetAddress();
 				return;
 			} else if(overLoadMethod == "DRPH"){
 				mutex.acquire();
@@ -159,6 +160,7 @@ public class ThreadPool {
 				bufferSemaphore.release();
 				mutex.release();
 				sever.refuse(firstReqInfo.getSocket(), firstReqInfo.getQueueCount());
+				System.out.println("problem serving request Socket[addr="+firstReqInfo.getSocket().getInetAddress()+",port="+firstReqInfo.getSocket().getLocalPort()+",localport="+SimpleWebServer.PORT+"]");
 				firstReqInfo.getSocket().close();
 			}
 		}
@@ -166,10 +168,11 @@ public class ThreadPool {
 		} catch (Exception e) {
 			//e.printStackTrace();
 		}
+		System.out.println("Connecton "+info.getQueueCount()+" queued. ("+new Date()+")");
 		this.buffer.add(info);
 		poolSemaphore.release();
 		//System.out.println("task added to buffer");
-		System.out.println("Connecton "+info.getQueueCount()+" queued. ("+new Date()+")");
+		
 	}
 
 	/**
@@ -182,6 +185,7 @@ public class ThreadPool {
 		//System.out.println("Thread close: ");
 		System.out.println(new Date()+" The server is shutting down ...");
 		try {
+			mon.doStop();
 			// interrupt all threads in the pool
 			for (PoolSingleThread thread : unloader) {
 				thread.doStop();
@@ -198,7 +202,7 @@ public class ThreadPool {
 				//System.out.println("Thread close: "+ reqInfo.getQueueCount());
 			}
 			System.out.println(new Date()+" Flushing "+count+" buffers ...");
-			System.out.println(new Date()+"The thread pool is shutting down ...");
+			System.out.println(new Date()+" The thread pool is shutting down ...");
 
 		} catch (Exception e) {
 		// TODO Auto-generated catch block
