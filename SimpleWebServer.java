@@ -150,6 +150,8 @@ public class SimpleWebServer {
 				}
 			} finally {
 				serverConnect.close();
+				if(scanner!=null)
+				scanner.close();
 			}
 
 		} catch (Exception e) {

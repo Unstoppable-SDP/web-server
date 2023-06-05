@@ -1,5 +1,4 @@
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,7 +32,7 @@ public class ThreadPool {
 	monitor mon;
 
 	// constructor
-	ThreadPool(int threadNumber, int bufferSize, String overLoadMethod, ServeWebRequest s) throws ThreadPoolException {
+	ThreadPool(int threadNumber, int bufferSize, String overLoadMethod, ServeWebRequest s) throws Exception {
 		setPoolSize(threadNumber);
 		setBufferSize(bufferSize);
 		setOverLoadMethod(overLoadMethod);
@@ -99,39 +98,39 @@ public class ThreadPool {
 	/**
 	 * This method sets the pool size
 	 * @param poolSize
-	 * @throws ThreadPoolException
+	 * @throws Exception
 	 */
-	public void setPoolSize(int poolSize) throws ThreadPoolException {
+	public void setPoolSize(int poolSize) throws  Exception {
 		if (this.poolSize == -1) {
 			if (poolSize < 1)
-				throw new ThreadPoolException("pool size must be positive");
+				throw new Exception("pool size must be positive");
 			this.poolSize = poolSize;
 		} else
-			throw new ThreadPoolException("pool already initialized");
+			throw new Exception("pool already initialized");
 	}
 
 	/**
 	 * This method sets the buffer size
 	 * @param bufferSize
-	 * @throws ThreadPoolException
+	 * @throws Exception
 	 */
 
-	public void setBufferSize(int bufferSize) throws ThreadPoolException {
+	public void setBufferSize(int bufferSize) throws Exception {
 		if (bufferSize < 1)
-			throw new ThreadPoolException("buffer size must be positive");
+			throw new Exception("buffer size must be positive");
 		this.bufferSize = bufferSize;
 	}
 
 	/**
 	 * This method sets the overload method
 	 * @param bufferSize
-	 * @throws ThreadPoolException
+	 * @throws Exception
 	 */
-	public void setOverLoadMethod(String overLoadMethod) throws ThreadPoolException {
+	public void setOverLoadMethod(String overLoadMethod) throws Exception {
 		if (overLoadMethod.equals("BLCK")|| overLoadMethod.equals("DRPT")|| overLoadMethod.equals("DRPH"))
 			this.overLoadMethod = overLoadMethod;
 		else
-			throw new ThreadPoolException("incorrect overload method");
+			throw new Exception("incorrect overload method");
 	}
 
 	/**
@@ -141,7 +140,7 @@ public class ThreadPool {
 	 * if the buffer is full and the overload method is drop, the thread will drop the request
 	 * if the buffer is full and the overload method is drop head, the thread will drop the first request in the buffer
 	 * @param info the request to be added to the buffer
-	 * @throws IOException
+	 * @throws Exception
 	 */
 	public void enqueue(RequestInfo info) {
 		try {
@@ -178,7 +177,7 @@ public class ThreadPool {
 	/**
 	 * This method closes the thread pool
 	 * it will interrupt all threads in the pool and remove all tasks from the buffer
-	 * @throws IOException
+	 * @throws Exception
 	 */
 
 	public void destroy() throws Exception {
@@ -205,19 +204,7 @@ public class ThreadPool {
 			System.out.println(new Date()+" The thread pool is shutting down ...");
 
 		} catch (Exception e) {
-		// TODO Auto-generated catch block
-		//e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
-}
-
-
-
-
-class ThreadPoolException extends Exception {
-	public ThreadPoolException(String message) {
-		super(message);
-	}
-
-	private static final long serialVersionUID = 1L;
 }

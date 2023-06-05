@@ -64,15 +64,10 @@ public class PoolSingleThread  implements Runnable  {
         return thread.isAlive();
     }
     
-    public synchronized void doStop(){
+    public void doStop(){
         done = true;
         //break pool thread out of dequeue() call.
         this.thread.interrupt();
     }
-
-    public synchronized boolean isStopped(){
-        return done;
-    }
-
     
 }

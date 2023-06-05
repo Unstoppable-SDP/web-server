@@ -53,7 +53,7 @@ public class monitor extends Thread {
         }
     }
 
-    public synchronized void doStop(){
+    public void doStop(){
         done = true;
         //break pool thread out of dequeue() call.
         this.thread.interrupt();
