@@ -1,5 +1,6 @@
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -150,6 +151,7 @@ public class ThreadPool {
 				System.out.println("task dropped");
 				sever.refuse(info.getSocket(), info.getQueueCount());
 				info.getSocket().close();
+				
 				return;
 			} else if(overLoadMethod == "DRPH"){
 				mutex.acquire();
@@ -162,11 +164,12 @@ public class ThreadPool {
 		}
 			bufferSemaphore.acquire();
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		this.buffer.add(info);
 		poolSemaphore.release();
-		System.out.println("task added to buffer");
+		//System.out.println("task added to buffer");
+		System.out.println("Connecton "+info.getQueueCount()+" queued. ("+new Date()+")");
 	}
 
 	/**
@@ -175,25 +178,31 @@ public class ThreadPool {
 	 * @throws IOException
 	 */
 
-	public void destroy() throws IOException {
-		System.out.println("Thread close: ");
+	public void destroy() throws Exception {
+		//System.out.println("Thread close: ");
+		System.out.println(new Date()+" The server is shutting down ...");
 		try {
 			// interrupt all threads in the pool
 			for (PoolSingleThread thread : unloader) {
 				thread.doStop();
 			}
 			// remove all tasks from the buffer
+			int count=0;
 			while(buffer.size()!=0){
 				mutex.acquire();
 				RequestInfo reqInfo =buffer.poll();
 				mutex.release();
 				sever.refuse(reqInfo.getSocket(), reqInfo.getQueueCount());
 				reqInfo.getSocket().close();
-				System.out.println("Thread close: "+ reqInfo.getQueueCount());
-			}		
-		} catch (InterruptedException e) {
+				count++;
+				//System.out.println("Thread close: "+ reqInfo.getQueueCount());
+			}
+			System.out.println(new Date()+" Flushing "+count+" buffers ...");
+			System.out.println(new Date()+"The thread pool is shutting down ...");
+
+		} catch (Exception e) {
 		// TODO Auto-generated catch block
-		e.printStackTrace();
+		//e.printStackTrace();
 		}
 	}
 }

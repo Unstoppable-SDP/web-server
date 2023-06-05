@@ -41,17 +41,11 @@ public class monitor extends Thread {
                 if(oldThread.isAlive())
                     continue;
                 else {
-                    System.out.print("Thread is dead" + i + "\n");
+                    System.out.print("Thread is dead" + (i+1) + "\n");
                     PoolSingleThread newThread = new PoolSingleThread(buffer, poolSemaphore, bufferSemaphore,mutex, server);
                     unloader.set(i, newThread);
                     new Thread(newThread).start();
                 }
-            }
-
-            try {
-                Thread.sleep(1000); // wait for 1 second before checking again
-            } catch (InterruptedException e) {
-                // ignore the interrupted exception
             }
         }
     }
