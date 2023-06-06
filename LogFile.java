@@ -23,10 +23,10 @@ public class LogFile {
         if(!log.exists()) {
             log.createNewFile();
         }
-        semaphore.acquire();
+        //semaphore.acquire();
         PrintStream logPrintStream = new PrintStream(new FileOutputStream(log, true));
         System.setOut(logPrintStream);
-        semaphore.release();
+        //semaphore.release();
     }
 
     public static void log(String message) {

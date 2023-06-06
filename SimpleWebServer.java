@@ -72,7 +72,7 @@ public class SimpleWebServer {
 					try{
 						PORT=Integer.parseInt(por);
 					}catch(NumberFormatException e){
-						System.out.println("Invalid port number");
+						System.out.println("Invalid port number, the default was set.");
 					}
 				}
 				System.out.println("Enter the number of thread or press enter for deafult (Number of thread =7)");
@@ -81,7 +81,7 @@ public class SimpleWebServer {
 					try{
 						threadNumber=Integer.parseInt(thr);
 					}catch(NumberFormatException e){
-						System.out.println("Invalid number of thread");
+						System.out.println("Invalid number of thread, the default was set.");
 					}
 				}
 				System.out.println("Enter the buffer size or press enter for deafult (Buffer Size =10)");
@@ -90,7 +90,7 @@ public class SimpleWebServer {
 					try{
 						bufferSize=Integer.parseInt(buf);
 					}catch(NumberFormatException e){
-						System.out.println("Invalid buffer size");
+						System.out.println("Invalid buffer size, the default was set.");
 					}
 				}
 				System.out.println("Enter the overload method or press enter for deafult (overload = BLCK)");
@@ -99,7 +99,7 @@ public class SimpleWebServer {
 					if(over.equals("BLCK")|| over.equals("DRPT")|| over.equals("DRPH")){
 						overload=over;
 					}else {
-						System.out.println("Invalid option");
+						System.out.println("Invalid option, the default was set.");
 					}
 					
 				}
