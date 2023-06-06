@@ -54,7 +54,7 @@ public class PoolSingleThread  implements Runnable  {
                 //Thread.sleep(100000);
                 info.getSocket().close();    
             } catch(Exception e){
-                e.printStackTrace();
+                //e.printStackTrace();
             }
                
              }
