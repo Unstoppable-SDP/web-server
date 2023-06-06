@@ -75,7 +75,7 @@ public class SimpleWebServer {
 						System.out.println("Invalid port number, the default was set.");
 					}
 				}
-				System.out.println("Enter the number of thread or press enter for deafult (Number of thread =7)");
+				System.out.println("Enter the number of thread or press enter for deafult (Number of thread =8)");
 				String thr= scanner.nextLine().trim();
 				if(!thr.isEmpty()){
 					try{
@@ -109,7 +109,7 @@ public class SimpleWebServer {
 			ServerSocket serverConnect = new ServerSocket(PORT);
 			
 			//log file
-			LogFile.redirectConsoleToFile("my-log-file.txt");
+			LogFile.redirectConsoleToFile("web-server-log.txt");
 
 			System.out.println(new Date()+": Server started.\nListening for connections on port : " + PORT + " ...\n");
 			//write into webserver-log
@@ -126,18 +126,18 @@ public class SimpleWebServer {
 					System.out.println(new Date()+" Server connection socket closed.");
 					System.out.println(new Date()+" The server exits.");
 				} catch (Exception e) {
-					e.printStackTrace();
+					//e.printStackTrace();
 				}
 				
 			}));
 			//listen until user halts server execution
 			try {
 				while (true) {
-					System.out.println("[SERVER] Waiting for client connection request...");
+					//System.out.println("[SERVER] Waiting for client connection request...");
 					// accept client connection request
 					connect = serverConnect.accept(); 
 					count++;
-					System.out.println("[SERVER] Connected to client!");
+					//System.out.println("[SERVER] Connected to client!");
 					
 					// create a new thread to handle the request
 					pool.enqueue(new RequestInfo(connect, count));
