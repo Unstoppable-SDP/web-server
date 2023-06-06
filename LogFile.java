@@ -1,20 +1,21 @@
 import java.io.*;
-import java.util.concurrent.Semaphore;
- /**
+
+/**
  * @(#)LogFile.java
  *
  * @author 
  * by Hind Alrashid
  * @version 1.00 2023/6/4 
- * The LogFile class is a simple class that provides 
- * a method for writing messages to a log file named "webserver-log". 
- * The logFileOutput method takes a message parameter and uses 
- * a semaphore to ensure that only one thread can access 
- * the log file at a time.
+ * The LogFile class contains a static method called 
+ * redirectConsoleToFile that can be used to redirect console output 
+ * to a log file. The method takes a file name as input and creates a new file
+ * if it does not already exist. It then creates a PrintStream object with a
+ * FileOutputStream object that writes to the log file. Finally, it sets the standard 
+ * output stream to the logPrintStream object so that all console output is redirected 
+ * to the specified log file. 
  */
 
 public class LogFile {
-    private static final Semaphore semaphore = new Semaphore(1);
 
     public static void redirectConsoleToFile(String logFileName) throws Exception {
         File log = new File(logFileName);
@@ -25,14 +26,4 @@ public class LogFile {
         System.setOut(logPrintStream);
     }
 
-    public static void log(String message) {
-        try {
-            semaphore.acquire();
-            System.out.println(message);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            semaphore.release();
-        }
-    }
 }
