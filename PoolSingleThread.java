@@ -29,6 +29,7 @@ public class PoolSingleThread  implements Runnable  {
     private ServeWebRequest server;
     private Semaphore mutex;
 
+
     public PoolSingleThread (Queue<RequestInfo> taskBuffer, Semaphore poolSemaphore , Semaphore bufferSemaphore,Semaphore mutex, ServeWebRequest s) {
         this.taskBuffer = taskBuffer;
         this.poolSemaphore = poolSemaphore;
@@ -40,24 +41,25 @@ public class PoolSingleThread  implements Runnable  {
     public void run() {
         this.thread = Thread.currentThread();
         // System.out.println("Thread Created " + thread.getName());
-        try{
+    
             while(!done){
+                try{
                 poolSemaphore.acquire();
                 //System.out.println("Thread " + thread.getName() + " is running");
                 mutex.acquire();
                 RequestInfo info =taskBuffer.poll();
                 System.out.println("Connecton "+info.getQueueCount()+" opened in "+thread.getName()+". ("+new Date()+")");
                 bufferSemaphore.release();
-                mutex.release();           
-                //Thread.sleep(1000000);
-                
+                mutex.release(); 
                 server.serve(info.getSocket(), info.getQueueCount());
-             }
+                Thread.sleep(1000);
+                info.getSocket().close();    
             }  catch(Exception e){
-            //log or otherwise report exception,
-            //but keep pool thread alive.
-           // System.out.println(e);
-        }
+                    System.out.println(e);
+                }
+               
+             }
+
 
     }
 

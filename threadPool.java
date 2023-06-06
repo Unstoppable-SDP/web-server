@@ -20,9 +20,9 @@ import java.util.concurrent.Semaphore;
 
 public class ThreadPool {
 	// The thread pool Variables
-	final List<PoolSingleThread> unloader = new LinkedList<PoolSingleThread>(); // unloader is the threadpool
+	final List<PoolSingleThread> unloader = new LinkedList<PoolSingleThread>(); //= thread pool
 	private final Queue<RequestInfo> buffer = new LinkedList<RequestInfo>(); // the queue for the buffer 
-	private int poolSize = -1; // variable for the poolSize
+	private int poolSize = -1; 
 	private int bufferSize = -1; // variable for max buffer size (used for overload handeling) 
 	private String overLoadMethod = ""; // stores the overload handeling method (default block)
 	Semaphore poolSemaphore; // this semaphore is used to block the threads when the buffer is empty
@@ -154,13 +154,18 @@ public class ThreadPool {
 				//info.getSocket().getInetAddress();
 				return;
 			} else if(overLoadMethod.equals("DRPH")){
+				RequestInfo firstReqInfo = null;
 				mutex.acquire();
-				RequestInfo firstReqInfo =buffer.poll();
-				bufferSemaphore.release();
+				if(bufferSemaphore.availablePermits() == 0) {
+					firstReqInfo =buffer.poll();
+					bufferSemaphore.release();
+				}
 				mutex.release();
+				if(firstReqInfo != null){
 				sever.refuse(firstReqInfo.getSocket(), firstReqInfo.getQueueCount());
 				System.out.println("problem serving request "+firstReqInfo.getSocket());
 				firstReqInfo.getSocket().close();
+				}
 			}
 		}
 			bufferSemaphore.acquire();
@@ -169,9 +174,7 @@ public class ThreadPool {
 		}
 		System.out.println("Connecton "+info.getQueueCount()+" queued. ("+new Date()+")");
 		this.buffer.add(info);
-		poolSemaphore.release();
-		//System.out.println("task added to buffer");
-		
+		poolSemaphore.release();		
 	}
 
 	/**
