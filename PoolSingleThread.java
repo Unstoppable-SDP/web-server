@@ -51,7 +51,7 @@ public class PoolSingleThread  implements Runnable  {
                 System.out.println("Connecton "+info.getQueueCount()+" opend in "+thread.getName()+". ("+new Date()+")");
                 mutex.release(); 
                 server.serve(info.getSocket(), info.getQueueCount());
-                Thread.sleep(100000);
+                //Thread.sleep(100000);
                 info.getSocket().close();    
             } catch(Exception e){
                 e.printStackTrace();
