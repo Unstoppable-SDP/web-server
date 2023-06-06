@@ -16,7 +16,7 @@ import java.io.*;
 
 public class Client {
     public static void main(String[] args) throws Exception {
-        URL url = new URL("http://localhost:5003"); // Replace with your server URL
+        URL url = new URL("http://localhost:8085"); // Replace with your server URL
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
         int responseCode = con.getResponseCode();

@@ -26,7 +26,7 @@ public class SimpleWebServer {
 	static int PORT = 8085;
 
 	// thread number
-	static int threadNumber = 7;
+	static int threadNumber = 8;
 
 	// buffer size
 
