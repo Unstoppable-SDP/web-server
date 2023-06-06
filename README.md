@@ -81,13 +81,17 @@ The ThreadPool class represents a thread pool that manages a fixed number of thr
 
 The PoolSingleThread class represents an individual thread in the thread pool managed by the ThreadPool class. Each thread is responsible for dequeuing requests from the buffer and serving them using the ServeWebRequest class. The class implements the Runnable interface and provides methods for starting, stopping, and checking the status of the thread. It also uses semaphores to manage thread concurrency and a flag to indicate when the thread is done.
 
-### ServeWebRequest
+### SimpleWebServer
 
 The ServeWebRequest class represents the logic for serving incoming requests from clients. It takes a Socket object as a parameter and serves the request by reading the input stream from the socket and writing the response to the output stream. It also logs server activity using the LogFile class.
 
 ### LogFile
 
 The LogFile class provides a method for writing messages to a log file named "webserver-log". The logFileOutput method takes a message parameter and uses a semaphore to ensure that only one thread can access the log file at a time. It first checks if the log file exists, and creates it if it does not. It then appends the message to the log file and releases the semaphore to allow other threads to access the file.
+
+### RequestInfo
+
+This class represents information about a request received from a client through a network socket. It encapsulates the socket object and the request number.
 
 ### monitor
 
