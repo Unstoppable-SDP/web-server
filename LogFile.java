@@ -17,16 +17,12 @@ public class LogFile {
     private static final Semaphore semaphore = new Semaphore(1);
 
     public static void redirectConsoleToFile(String logFileName) throws Exception {
-        
         File log = new File(logFileName);
-
         if(!log.exists()) {
             log.createNewFile();
         }
-        //semaphore.acquire();
         PrintStream logPrintStream = new PrintStream(new FileOutputStream(log, true));
         System.setOut(logPrintStream);
-        //semaphore.release();
     }
 
     public static void log(String message) {

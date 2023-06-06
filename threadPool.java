@@ -147,11 +147,9 @@ public class ThreadPool {
 		
 		if(bufferSemaphore.availablePermits() == 0){
 			if(overLoadMethod.equals("DRPT")){
-				//System.out.println("task dropped");
 				sever.refuse(info.getSocket(), info.getQueueCount());
-				info.getSocket().close();
 				System.out.println("problem serving request "+info.getSocket());
-				//info.getSocket().getInetAddress();
+				info.getSocket().close();
 				return;
 			} else if(overLoadMethod.equals("DRPH")){
 				RequestInfo firstReqInfo = null;
@@ -170,7 +168,7 @@ public class ThreadPool {
 		}
 			bufferSemaphore.acquire();
 		} catch (Exception e) {
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 		System.out.println("Connecton "+info.getQueueCount()+" queued. ("+new Date()+")");
 		this.buffer.add(info);
@@ -201,13 +199,12 @@ public class ThreadPool {
 				sever.refuse(reqInfo.getSocket(), reqInfo.getQueueCount());
 				reqInfo.getSocket().close();
 				count++;
-				//System.out.println("Thread close: "+ reqInfo.getQueueCount());
 			}
 			System.out.println(new Date()+" Flushing "+count+" buffers ...");
 			System.out.println(new Date()+" The thread pool is shutting down ...");
 
 		} catch (Exception e) {
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 	}
 }

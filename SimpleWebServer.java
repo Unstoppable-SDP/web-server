@@ -19,26 +19,26 @@ import java.util.Scanner;
  */
 public class SimpleWebServer {
 
-	// verbose mode
+	// Verbose mode
 	static final boolean verbose = true;
 
-	// port to listen for connection
+	// Port to listen for connection
 	static int PORT = 8085;
 
-	// thread number
+	// Thread number
 	static int threadNumber = 8;
 
-	// buffer size
+	// Buffer size
 
 	static int bufferSize = 10;
 
-	// overload method
+	// Overload method
 	static String overload = "BLCK";
 
 	// Client Connection via Socket Class
 	static Socket connect;
 
-	// connection ID
+	// Connection ID
 	static int count = 0;
 
 	private static ThreadPool pool;
@@ -105,16 +105,15 @@ public class SimpleWebServer {
 				}
 			}
 			System.out.println(PORT+" "+threadNumber+" "+bufferSize+" "+overload);
-			// create a server listening socket
+			//create a server listening socket
 			ServerSocket serverConnect = new ServerSocket(PORT);
 			
-			// log file
+			//log file
 			LogFile.redirectConsoleToFile("my-log-file.txt");
-			//System.out.println(serverConnect.getLocalPort()+" "+ serverConnect.getInetAddress()+" "+serverConnect.getLocalSocketAddress()+" ");
 
 			System.out.println(new Date()+": Server started.\nListening for connections on port : " + PORT + " ...\n");
 			//write into webserver-log
-			// create one instance of the required task
+			//create one instance of the required task
 			ServeWebRequest s = new ServeWebRequest();
 
 			pool= new ThreadPool(threadNumber, bufferSize, overload,s);
@@ -127,13 +126,11 @@ public class SimpleWebServer {
 					System.out.println(new Date()+" Server connection socket closed.");
 					System.out.println(new Date()+" The server exits.");
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					//e.printStackTrace();
+					e.printStackTrace();
 				}
 				
 			}));
-			// listen until user halts server execution
-
+			//listen until user halts server execution
 			try {
 				while (true) {
 					System.out.println("[SERVER] Waiting for client connection request...");
@@ -141,7 +138,6 @@ public class SimpleWebServer {
 					connect = serverConnect.accept(); 
 					count++;
 					System.out.println("[SERVER] Connected to client!");
-					//write into webserver-log
 					
 					// create a new thread to handle the request
 					pool.enqueue(new RequestInfo(connect, count));

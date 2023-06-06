@@ -1,4 +1,3 @@
-import java.util.Date;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
@@ -23,7 +22,7 @@ public class PoolSingleThread  implements Runnable  {
 
     private Thread thread = null;
     private Queue<RequestInfo> taskBuffer;
-    private boolean done = false; // flag to indicate if the thread is done
+    private boolean done = false; // flag for checking the life of the threads
     private Semaphore poolSemaphore;
     private Semaphore bufferSemaphore;
     private ServeWebRequest server;
@@ -40,23 +39,21 @@ public class PoolSingleThread  implements Runnable  {
 
     public void run() {
         this.thread = Thread.currentThread();
-        // System.out.println("Thread Created " + thread.getName());
     
             while(!done){
                 try{
                 poolSemaphore.acquire();
-                //System.out.println("Thread " + thread.getName() + " is running");
+                System.out.println("Thread " + thread.getName() + " is running");
                 mutex.acquire();
                 RequestInfo info =taskBuffer.poll();
-                System.out.println("Connecton "+info.getQueueCount()+" opened in "+thread.getName()+". ("+new Date()+")");
                 bufferSemaphore.release();
                 mutex.release(); 
                 server.serve(info.getSocket(), info.getQueueCount());
                 Thread.sleep(1000);
                 info.getSocket().close();    
-            }  catch(Exception e){
-                    System.out.println(e);
-                }
+            } catch(Exception e){
+                e.printStackTrace();
+            }
                
              }
 

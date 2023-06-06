@@ -17,12 +17,12 @@ import java.util.concurrent.Semaphore;
 
 public class monitor extends Thread {
     private Thread thread = null;
-    private boolean done = false; // flag to indicate if the thread is done
-    private Queue<RequestInfo> buffer = new LinkedList<RequestInfo>(); // the queue for the buffer
-    Semaphore poolSemaphore; // this semaphore is used to block the threads when the buffer is empty
-	Semaphore bufferSemaphore; // this semaphore is used to block the threads when the buffer is full
-    Semaphore mutex; // this semaphore is used to make sure that only one thread is accessing the buffer at a time
-	ServeWebRequest server; // socket for the connection
+    private boolean done = false; // Flag to indicate if the thread is done
+    private Queue<RequestInfo> buffer = new LinkedList<RequestInfo>(); // The queue for the buffer
+    Semaphore poolSemaphore; // This semaphore is used to block the threads when the buffer is empty
+	Semaphore bufferSemaphore; // This semaphore is used to block the threads when the buffer is full
+    Semaphore mutex; // This semaphore is used to make sure that only one thread is accessing the buffer at a time
+	ServeWebRequest server; // Socket for the connection
     List<PoolSingleThread> unloader;
     int poolSize;
     
@@ -55,7 +55,7 @@ public class monitor extends Thread {
 
     public void doStop(){
         done = true;
-        //break pool thread out of dequeue() call.
+        // Break pool thread out of dequeue() call.
         this.thread.interrupt();
     }
 
